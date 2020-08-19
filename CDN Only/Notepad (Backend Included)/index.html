@@ -98,8 +98,37 @@
             })
         }
 
+        async pushNote(content) {
+
+            try {
+
+                let res = await fetch('http://rudraksh.dx.am/reactjs/notepad/api/addNote.php',
+
+                    {
+                        method: 'post',
+                        mode: 'no-cors',
+                        headers: {
+                            'Accept': 'application/json',
+                            'Content-type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            "content": content
+                        })
+                    });
+
+                console.log('Response : ' + res.statusText);
+
+            }
+
+            catch (e) {
+                console.log(e);
+            }
+
+        }
+
         addNote = (note) => {
-            note.id = Math.random();
+
+            this.pushNote(note.content);
             let notes = [...this.state.notes, note];
             this.setState({
                 notes: notes
