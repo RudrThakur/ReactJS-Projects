@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>React JS - Notepad</title>
+    <script crossorigin src="https://unpkg.com/react@16/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@16/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+
+<body>
+    <div id="app"></div>
+</body>
+<script type="text/babel">
+
+    /* ------------------------------------------------
+                            COMPONENTS
+    --------------------------------------------------- */
+
+    // Add Notes
+
+    class AddNote extends React.Component {
+
+        state = {
+            content: ''
+        }
+
+        handleAddNote = (event) => {
+            this.setState({
+                content: event.target.value
+            })
+        }
+
+        handleSubmitNote = (event) => {
+            event.preventDefault();
+            this.props.addNote(this.state);
+            this.setState({
+                content: ''
+            })
+        }
+
+        render() {
+            return (
+                <div>
+                    <form onSubmit={this.handleSubmitNote}>
+                        <label>Add New Note:</label>
+                        <input type="text" onChange={this.handleAddNote}
+                            value={this.state.content} />
+                    </form>
+                </div>
+            )
+        }
+    }
+
+    // Display Notes
+
+    const Notes = ({ notes, deleteNote }) => {
+        const allNotes = notes.length ? (
+            notes.map((note) => {
+                return (
+                    <div className="collection-item" key={note.id}>
+                        <span>{note.content}
+                            <a href="javascript:void(0)"
+                                onClick={() => { deleteNote(note.id) }}>
+                                <i className="material-icons">close</i>
+                            </a>
+                        </span>
+                    </div>
+                )
+            })
+        ) : (
+                <p className="center">No Notes Available</p>
+            )
+
+        return <div className="notes collection">{allNotes}</div>
+    }
+
+    /* ------------------------------------------------
+                          APP
+  --------------------------------------------------- */
+
+    class App extends React.Component {
+        state = {
+            notes:
+                [
+                    { id: 1, content: 'hello reactjs' },
+                    { id: 2, content: 'i love reactjs' },
+                    { id: 3, content: 'Hi my name is Rudr And I m a new React Developer' },
+                ]
+        }
+
+        addNote = (note) => {
+            note.id = Math.random();
+            let notes = [...this.state.notes, note];
+            this.setState({
+                notes: notes
+            })
+        }
+
+        deleteNote = (id) => {
+            const notes = this.state.notes.filter(
+                note => {
+                    return note.id !== id
+                }
+            )
+
+            this.setState({
+                notes: notes
+            })
+        }
+
+        render() {
+            return (
+                <div className="notepad-app container">
+                    <h1 class="center blue-text">Notes</h1>
+                    <Notes
+                        notes={this.state.notes}
+                        deleteNote={this.deleteNote} />
+                    <AddNote addNote={this.addNote} />
+                </div>
+            )
+        }
+    }
+
+    ReactDOM.render(<App />, document.getElementById("app"))
+</script>
+
+
+</html>
