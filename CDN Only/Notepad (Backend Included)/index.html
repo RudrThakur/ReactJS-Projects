@@ -135,7 +135,36 @@
             })
         }
 
+        async removeNote(id) {
+
+            try {
+
+                let res = await fetch('http://rudraksh.dx.am/reactjs/notepad/api/removeNote.php',
+
+                    {
+                        method: 'post',
+                        mode: 'no-cors',
+                        headers: {
+                            'Accept': 'application/json',
+                            'Content-type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            "id": id
+                        })
+                    });
+
+                console.log('Response : ' + res.statusText);
+
+            }
+
+            catch (e) {
+                console.log(e);
+            }
+
+        }
+
         deleteNote = (id) => {
+            this.removeNote(id);
             const notes = this.state.notes.filter(
                 note => {
                     return note.id !== id
