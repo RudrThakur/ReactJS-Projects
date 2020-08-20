@@ -81,8 +81,17 @@
         ) :
             (
                 <div className="center container">
-                    <span>Loading Question...
-                    </span>
+                    <div className="preloader-wrapper active">
+                        <div className="spinner-layer spinner-red-only">
+                            <div className="circle-clipper left">
+                                <div className="circle"></div>
+                            </div><div className="gap-patch">
+                                <div className="circle"></div>
+                            </div><div className="circle-clipper right">
+                                <div className="circle"></div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             )
 
@@ -113,7 +122,9 @@
                 )
             })
         ) : (
-                <p className="center">Loading Options</p>
+
+                <p className="center">Loading</p>
+
             )
 
         return (<div className="options collection">{allOptions}</div>)
@@ -144,8 +155,13 @@
         return (
             <div className="container center">
                 <p>Your Score Has Been Recorded. Thanks For Playing, {playerName}</p>
+                <a class="waves-effect waves-light btn" onClick={playAgain}><i class="material-icons left">autorenew</i>Play Again</a>
             </div>
         )
+    }
+
+    const playAgain = () => {
+        window.location.reload();
     }
 
 
@@ -236,12 +252,13 @@
                         selectedAnswer={this.state.selectedAnswer}
                         checkAnswer={this.checkAnswer}
                         question={this.state.question} /> : null}
-                    <Scoreboard
+                    {this.state.score ? <Scoreboard
                         rightAnswers={this.state.rightAnswers}
-                        totalQuestions={this.state.totalQuestions} />
+                        totalQuestions={this.state.totalQuestions} /> : null}
                     {this.state.askPlayerName && !this.state.playerName ? <SavePlayer savePlayer={this.savePlayer} /> : null}
                     {this.state.playerName ? <GreetPlayer playerName={this.state.playerName} /> : null}
                     <Credits />
+
                 </div>
             )
         }
