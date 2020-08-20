@@ -252,9 +252,9 @@
                         selectedAnswer={this.state.selectedAnswer}
                         checkAnswer={this.checkAnswer}
                         question={this.state.question} /> : null}
-                    {this.state.score ? <Scoreboard
+                    <Scoreboard
                         rightAnswers={this.state.rightAnswers}
-                        totalQuestions={this.state.totalQuestions} /> : null}
+                        totalQuestions={this.state.totalQuestions} />
                     {this.state.askPlayerName && !this.state.playerName ? <SavePlayer savePlayer={this.savePlayer} /> : null}
                     {this.state.playerName ? <GreetPlayer playerName={this.state.playerName} /> : null}
                     <Credits />
