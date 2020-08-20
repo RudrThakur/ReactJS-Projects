@@ -54,7 +54,7 @@
         const allOptions = question.question ? (
             allAnswers.map((option) => {
                 return (
-                    <div className={selectedAnswer === option ? "collection-item teal lighten-5" : "collection-item"}
+                    <div className={selectedAnswer === option ? "collection-item cyan lighten-3" : "collection-item"}
                         onClick={() => { checkAnswer(option) }}>
                         <span>{option}
                         </span>
@@ -69,17 +69,41 @@
 
     }
 
+    const Scoreboard = ({ rightAnswers, totalQuestions }) => {
+
+        return (
+            <div className="container center">
+                Score: {rightAnswers}/{totalQuestions}
+            </div>
+        )
+    }
+
     /* ------------------------------------------------
                            APP
    --------------------------------------------------- */
 
     class App extends React.Component {
-        state = {
-            question: {},
-            selectedAnswer: '',
+
+        constructor(props) {
+            super(props);
+            this.state = {
+                question: {},
+                selectedAnswer: '',
+                rightAnswers: 0,
+                totalQuestions: 0
+            }
         }
 
         async componentDidMount() {
+            const quizAPIUrl = 'https://opentdb.com/api.php?amount=1&category=18&difficulty=easy&type=multiple';
+            const response = await fetch(quizAPIUrl);
+            const data = await response.json();
+            this.setState({
+                question: data.results[0]
+            })
+        }
+
+        async nextQuestion() {
             const quizAPIUrl = 'https://opentdb.com/api.php?amount=1&category=18&difficulty=easy&type=multiple';
             const response = await fetch(quizAPIUrl);
             const data = await response.json();
@@ -92,13 +116,23 @@
 
             if (this.state.question.correct_answer === option) {
                 this.setState({
-                    selectedAnswer: option
+                    selectedAnswer: option,
+                    rightAnswers: this.state.rightAnswers + 1,
                 })
                 console.log("CORRECT ANSWER");
             }
 
-            else
+            else {
                 console.log("WRONG ANSWER");
+            }
+
+            this.setState({
+                totalQuestions: this.state.totalQuestions + 1
+            })
+
+            setTimeout(function () {
+                this.nextQuestion();
+            }.bind(this), 500)
 
         }
 
@@ -111,6 +145,9 @@
                         selectedAnswer={this.state.selectedAnswer}
                         checkAnswer={this.checkAnswer}
                         question={this.state.question} />
+                    <Scoreboard
+                        rightAnswers={this.state.rightAnswers}
+                        totalQuestions={this.state.totalQuestions} />
                 </div>
             )
         }
