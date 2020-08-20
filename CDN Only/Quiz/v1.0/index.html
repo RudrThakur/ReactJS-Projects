@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>React JS - Quiz</title>
+    <script crossorigin src="https://unpkg.com/react@16/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@16/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+
+<body>
+    <div id="app"></div>
+</body>
+<script type="text/babel">
+
+    /* ------------------------------------------------
+                        COMPONENTS
+   --------------------------------------------------- */
+    const Question = ({ question }) => {
+
+        return question.question ? (
+            <div className="center container">
+                <span>{question.question}
+                </span>
+            </div>
+        ) :
+            (
+                <div className="center container">
+                    <span>Loading Question...
+                    </span>
+                </div>
+            )
+
+    }
+
+    const Options = ({ question, checkAnswer, selectedAnswer }) => {
+
+        let correctAnswer = question.correct_answer;
+
+        let incorrectAnswers = question.incorrect_answers;
+
+        let allAnswers = [];
+
+        allAnswers.push(correctAnswer);
+
+        for (const key in incorrectAnswers) {
+            allAnswers.push(incorrectAnswers[key]);
+        }
+
+        const allOptions = question.question ? (
+            allAnswers.map((option) => {
+                return (
+                    <div className={selectedAnswer === option ? "collection-item teal lighten-5" : "collection-item"}
+                        onClick={() => { checkAnswer(option) }}>
+                        <span>{option}
+                        </span>
+                    </div >
+                )
+            })
+        ) : (
+                <p className="center">Loading Options</p>
+            )
+
+        return (<div className="options collection">{allOptions}</div>)
+
+    }
+
+    /* ------------------------------------------------
+                           APP
+   --------------------------------------------------- */
+
+    class App extends React.Component {
+        state = {
+            question: {},
+            selectedAnswer: '',
+        }
+
+        async componentDidMount() {
+            const quizAPIUrl = 'https://opentdb.com/api.php?amount=1&category=18&difficulty=easy&type=multiple';
+            const response = await fetch(quizAPIUrl);
+            const data = await response.json();
+            this.setState({
+                question: data.results[0]
+            })
+        }
+
+        checkAnswer = (option) => {
+
+            if (this.state.question.correct_answer === option) {
+                this.setState({
+                    selectedAnswer: option
+                })
+                console.log("CORRECT ANSWER");
+            }
+
+            else
+                console.log("WRONG ANSWER");
+
+        }
+
+        render() {
+            return (
+                <div className="quiz-app container">
+                    <h1 class="center blue-text">Quiz</h1>
+                    <Question question={this.state.question} />
+                    <Options
+                        selectedAnswer={this.state.selectedAnswer}
+                        checkAnswer={this.checkAnswer}
+                        question={this.state.question} />
+                </div>
+            )
+        }
+    }
+
+    ReactDOM.render(<App />, document.getElementById("app"))
+</script>
+
+</html>
