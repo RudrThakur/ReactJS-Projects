@@ -11,6 +11,19 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
+<style>
+    .credits {
+        position: absolute;
+        bottom: 0;
+        width: 100;
+        margin-bottom: 2%;
+    }
+
+    .heart,
+    .game-over-message {
+        color: red;
+    }
+</style>
 
 <body>
     <div id="app"></div>
@@ -20,6 +33,44 @@
     /* ------------------------------------------------
                         COMPONENTS
    --------------------------------------------------- */
+
+    class SavePlayer extends React.Component {
+        constructor(props) {
+            super(props)
+
+            this.state = {
+                player: ''
+            }
+        }
+
+        handleSavePlayer = (event) => {
+            this.setState({
+                player: event.target.value
+            })
+        }
+
+        handleSubmitSavePlayer = (event) => {
+            event.preventDefault();
+            this.props.savePlayer(this.state.player);
+            this.setState({
+                player: ''
+            })
+        }
+
+        render() {
+            return (
+                <div>
+                    <h6 className="center game-over-message">Game Over !</h6>
+                    <form onSubmit={this.handleSubmitSavePlayer}>
+                        <label>Enter Your Name :</label>
+                        <input type="text" onChange={this.handleSavePlayer}
+                            value={this.state.player} />
+                    </form>
+                </div>
+            )
+        }
+
+    }
     const Question = ({ question }) => {
 
         return question.question ? (
@@ -78,6 +129,26 @@
         )
     }
 
+    const Credits = () => {
+        return (
+            <div className="container center credits">
+                <span className="credit-text">Made By&nbsp;
+                    <a href="http://rudraksh.dx.am">Rudr Thakur</a>
+                    &nbsp;with<i className="material-icons heart">favorite</i></span>
+            </div>
+        )
+    }
+
+    const GreetPlayer = ({ playerName }) => {
+
+        return (
+            <div className="container center">
+                <p>Your Score Has Been Recorded. Thanks For Playing, {playerName}</p>
+            </div>
+        )
+    }
+
+
     /* ------------------------------------------------
                            APP
    --------------------------------------------------- */
@@ -87,29 +158,41 @@
         constructor(props) {
             super(props);
             this.state = {
+                questionsSet: [],
                 question: {},
                 selectedAnswer: '',
                 rightAnswers: 0,
-                totalQuestions: 0
+                totalQuestions: 0,
+                playerName: '',
+                askPlayerName: false,
             }
         }
 
         async componentDidMount() {
-            const quizAPIUrl = 'https://opentdb.com/api.php?amount=1&category=18&difficulty=easy&type=multiple';
+            const quizAPIUrl = 'https://opentdb.com/api.php?amount=30&category=18&difficulty=easy&type=multiple';
             const response = await fetch(quizAPIUrl);
             const data = await response.json();
             this.setState({
-                question: data.results[0]
+                question: data.results[0],
+                questionsSet: data.results
             })
         }
 
-        async nextQuestion() {
-            const quizAPIUrl = 'https://opentdb.com/api.php?amount=1&category=18&difficulty=easy&type=multiple';
-            const response = await fetch(quizAPIUrl);
-            const data = await response.json();
-            this.setState({
-                question: data.results[0]
-            })
+        nextQuestion() {
+            if (this.state.totalQuestions > 29) {
+
+                this.setState({
+                    askPlayerName: true
+                })
+
+                // console.log('THANKS FOR PLAYING ');
+            }
+            else {
+                this.setState({
+                    question: this.state.questionsSet[this.state.totalQuestions]
+                })
+            }
+
         }
 
         checkAnswer = (option) => {
@@ -119,11 +202,11 @@
                     selectedAnswer: option,
                     rightAnswers: this.state.rightAnswers + 1,
                 })
-                console.log("CORRECT ANSWER");
+                // console.log("CORRECT ANSWER");
             }
 
             else {
-                console.log("WRONG ANSWER");
+                // console.log("WRONG ANSWER");
             }
 
             this.setState({
@@ -136,18 +219,29 @@
 
         }
 
+        savePlayer = (playerName) => {
+
+            this.setState({
+                playerName: playerName
+            })
+
+        }
+
         render() {
             return (
                 <div className="quiz-app container">
-                    <h1 class="center blue-text">Quiz</h1>
-                    <Question question={this.state.question} />
-                    <Options
+                    <h4 class="center blue-text">Quiz-Game</h4>
+                    {!this.state.askPlayerName ? <Question question={this.state.question} /> : null}
+                    {!this.state.askPlayerName ? <Options
                         selectedAnswer={this.state.selectedAnswer}
                         checkAnswer={this.checkAnswer}
-                        question={this.state.question} />
+                        question={this.state.question} /> : null}
                     <Scoreboard
                         rightAnswers={this.state.rightAnswers}
                         totalQuestions={this.state.totalQuestions} />
+                    {this.state.askPlayerName && !this.state.playerName ? <SavePlayer savePlayer={this.savePlayer} /> : null}
+                    {this.state.playerName ? <GreetPlayer playerName={this.state.playerName} /> : null}
+                    <Credits />
                 </div>
             )
         }
