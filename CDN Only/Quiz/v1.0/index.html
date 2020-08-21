@@ -111,7 +111,7 @@
             })
         ) : (
 
-                <p className="center">Loading</p>
+                <p className="center">Loading Options</p>
 
             )
 
@@ -167,6 +167,7 @@
                         </div>
                     </div>
                 </div>
+                <p className="center">Loading</p>
             </div>
         )
     }
@@ -209,7 +210,6 @@
                     askPlayerName: true
                 })
 
-                // console.log('THANKS FOR PLAYING ');
             }
             else {
 
@@ -219,15 +219,11 @@
                 })
 
                 setTimeout(function () {
-
                     this.setState({
                         showPreloader: false
                     })
-
                 }.bind(this), 2000)
-
             }
-
         }
 
         checkAnswer = (option) => {
@@ -237,11 +233,11 @@
                     selectedAnswer: option,
                     rightAnswers: this.state.rightAnswers + 1,
                 })
-                // console.log("CORRECT ANSWER");
+                // Right Answer
             }
 
             else {
-                // console.log("WRONG ANSWER");
+                // Wrong Answer
             }
 
             this.setState({
@@ -249,7 +245,6 @@
             })
 
             setTimeout(function () {
-
                 this.nextQuestion();
             }.bind(this), 500)
 
