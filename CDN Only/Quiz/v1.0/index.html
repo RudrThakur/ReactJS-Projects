@@ -80,19 +80,7 @@
             </div>
         ) :
             (
-                <div className="center container">
-                    <div className="preloader-wrapper active">
-                        <div className="spinner-layer spinner-red-only">
-                            <div className="circle-clipper left">
-                                <div className="circle"></div>
-                            </div><div className="gap-patch">
-                                <div className="circle"></div>
-                            </div><div className="circle-clipper right">
-                                <div className="circle"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                Preloader()
             )
 
     }
@@ -164,6 +152,25 @@
         window.location.reload();
     }
 
+    const Preloader = () => {
+
+        return (
+            <div className="center container">
+                <div className="preloader-wrapper active">
+                    <div className="spinner-layer spinner-red-only">
+                        <div className="circle-clipper left">
+                            <div className="circle"></div>
+                        </div><div className="gap-patch">
+                            <div className="circle"></div>
+                        </div><div className="circle-clipper right">
+                            <div className="circle"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        )
+    }
+
 
     /* ------------------------------------------------
                            APP
@@ -181,6 +188,7 @@
                 totalQuestions: 0,
                 playerName: '',
                 askPlayerName: false,
+                showPreloader: false,
             }
         }
 
@@ -204,9 +212,20 @@
                 // console.log('THANKS FOR PLAYING ');
             }
             else {
+
                 this.setState({
-                    question: this.state.questionsSet[this.state.totalQuestions]
+                    question: this.state.questionsSet[this.state.totalQuestions],
+                    showPreloader: true
                 })
+
+                setTimeout(function () {
+
+                    this.setState({
+                        showPreloader: false
+                    })
+
+                }.bind(this), 2000)
+
             }
 
         }
@@ -230,6 +249,7 @@
             })
 
             setTimeout(function () {
+
                 this.nextQuestion();
             }.bind(this), 500)
 
@@ -247,18 +267,22 @@
             return (
                 <div className="quiz-app container">
                     <h4 class="center blue-text">Quiz-Game</h4>
-                    {!this.state.askPlayerName ? <Question question={this.state.question} /> : null}
-                    {!this.state.askPlayerName ? <Options
-                        selectedAnswer={this.state.selectedAnswer}
-                        checkAnswer={this.checkAnswer}
-                        question={this.state.question} /> : null}
+                    {this.state.showPreloader ? <Preloader /> : null}
+                    {!this.state.askPlayerName &&
+                        !this.state.showPreloader ? <Question
+                            question={this.state.question}
+                        /> : null}
+                    {!this.state.askPlayerName &&
+                        !this.state.showPreloader ? <Options
+                            selectedAnswer={this.state.selectedAnswer}
+                            checkAnswer={this.checkAnswer}
+                            question={this.state.question} /> : null}
                     <Scoreboard
                         rightAnswers={this.state.rightAnswers}
                         totalQuestions={this.state.totalQuestions} />
                     {this.state.askPlayerName && !this.state.playerName ? <SavePlayer savePlayer={this.savePlayer} /> : null}
                     {this.state.playerName ? <GreetPlayer playerName={this.state.playerName} /> : null}
                     <Credits />
-
                 </div>
             )
         }
