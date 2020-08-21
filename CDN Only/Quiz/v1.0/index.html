@@ -23,6 +23,12 @@
     .game-over-message {
         color: red;
     }
+
+    .scoreboard {
+        margin: 10% 0;
+        padding: 2%;
+        font-size: 20px;
+    }
 </style>
 
 <body>
@@ -103,7 +109,7 @@
             allAnswers.map((option) => {
                 return (
                     <div className={(selectedAnswer === option ?
-                        (selectedAnswer === correctAnswer ? "collection-item cyan lighten-3" :
+                        (!isIncorrectAnswer ? "collection-item cyan lighten-3" :
                             "collection-item red lighten-3") :
                         (isIncorrectAnswer &&
                             option === correctAnswer &&
@@ -128,7 +134,7 @@
     const Scoreboard = ({ rightAnswers, totalQuestions }) => {
 
         return (
-            <div className="container center">
+            <div className="center scoreboard orange lighten-3">
                 Score: {rightAnswers}/{totalQuestions}
             </div>
         )
@@ -276,7 +282,10 @@
         render() {
             return (
                 <div className="quiz-app container">
-                    <h4 class="center blue-text">Quiz-Game</h4>
+                    <h4 className="center blue-text">Quiz-Game</h4>
+                    <Scoreboard
+                        rightAnswers={this.state.rightAnswers}
+                        totalQuestions={this.state.totalQuestions} />
                     {this.state.showPreloader ? <Preloader /> : null}
                     {!this.state.askPlayerName &&
                         !this.state.showPreloader ? <Question
@@ -288,9 +297,6 @@
                             checkAnswer={this.checkAnswer}
                             question={this.state.question}
                             isIncorrectAnswer={this.state.isIncorrectAnswer} /> : null}
-                    <Scoreboard
-                        rightAnswers={this.state.rightAnswers}
-                        totalQuestions={this.state.totalQuestions} />
                     {this.state.askPlayerName && !this.state.playerName ? <SavePlayer savePlayer={this.savePlayer} /> : null}
                     {this.state.playerName ? <GreetPlayer playerName={this.state.playerName} /> : null}
                     <Credits />
