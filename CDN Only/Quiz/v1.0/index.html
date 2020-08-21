@@ -85,7 +85,7 @@
 
     }
 
-    const Options = ({ question, checkAnswer, selectedAnswer }) => {
+    const Options = ({ question, checkAnswer, selectedAnswer, isIncorrectAnswer }) => {
 
         let correctAnswer = question.correct_answer;
 
@@ -102,7 +102,13 @@
         const allOptions = question.question ? (
             allAnswers.map((option) => {
                 return (
-                    <div className={selectedAnswer === option ? "collection-item cyan lighten-3" : "collection-item"}
+                    <div className={(selectedAnswer === option ?
+                        (selectedAnswer === correctAnswer ? "collection-item cyan lighten-3" :
+                            "collection-item red lighten-3") :
+                        (isIncorrectAnswer &&
+                            option === correctAnswer &&
+                            selectedAnswer
+                            ? "collection-item cyan lighten-3" : "collection-item"))}
                         onClick={() => { checkAnswer(option) }}>
                         <span>{option}
                         </span>
@@ -190,6 +196,7 @@
                 playerName: '',
                 askPlayerName: false,
                 showPreloader: false,
+                isIncorrectAnswer: true,
             }
         }
 
@@ -224,24 +231,32 @@
                     })
                 }.bind(this), 2000)
             }
+
+            this.setState({
+                selectedAnswer: ''
+            })
         }
 
         checkAnswer = (option) => {
 
             if (this.state.question.correct_answer === option) {
                 this.setState({
-                    selectedAnswer: option,
                     rightAnswers: this.state.rightAnswers + 1,
+                    isIncorrectAnswer: false
                 })
                 // Right Answer
             }
 
             else {
                 // Wrong Answer
+                this.setState({
+                    isIncorrectAnswer: true
+                })
             }
 
             this.setState({
-                totalQuestions: this.state.totalQuestions + 1
+                totalQuestions: this.state.totalQuestions + 1,
+                selectedAnswer: option
             })
 
             setTimeout(function () {
@@ -271,7 +286,8 @@
                         !this.state.showPreloader ? <Options
                             selectedAnswer={this.state.selectedAnswer}
                             checkAnswer={this.checkAnswer}
-                            question={this.state.question} /> : null}
+                            question={this.state.question}
+                            isIncorrectAnswer={this.state.isIncorrectAnswer} /> : null}
                     <Scoreboard
                         rightAnswers={this.state.rightAnswers}
                         totalQuestions={this.state.totalQuestions} />
