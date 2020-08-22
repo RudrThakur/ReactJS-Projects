@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>React JS - Quiz</title>
+    <script crossorigin src="https://unpkg.com/react@16/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@16/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<style>
+    .credits {
+        position: absolute;
+        bottom: 0;
+        width: 100;
+        margin-bottom: 2%;
+    }
+
+    .heart,
+    .game-over-message {
+        color: red;
+    }
+
+    .scoreboard {
+        margin-top: 10%;
+        padding: 2%;
+        font-size: 20px;
+    }
+
+    .timer {
+        margin-bottom: 2%;
+        padding: 2%;
+    }
+
+    .preloader {
+        margin-top: 50%;
+    }
+</style>
+
+<body>
+    <div id="app"></div>
+</body>
+<script type="text/babel">
+
+    /* ------------------------------------------------
+                        COMPONENTS
+   --------------------------------------------------- */
+
+
+    const Timer = ({ time }) => {
+
+        return (
+            <div className="center grey lighten-3 timer">
+                <h6>Time Taken : {Math.floor(time / 1000)} Seconds</h6>
+            </div>
+        )
+
+    }
+
+    class SavePlayer extends React.Component {
+        constructor(props) {
+            super(props)
+
+            this.state = {
+                player: ''
+            }
+        }
+
+        handleSavePlayer = (event) => {
+            this.setState({
+                player: event.target.value
+            })
+        }
+
+        handleSubmitSavePlayer = (event) => {
+            event.preventDefault();
+            this.props.savePlayer(this.state.player, this.props.score, this.props.time_taken);
+            this.setState({
+                player: ''
+            })
+        }
+
+        render() {
+            return (
+                <div>
+                    <h6 className="center game-over-message">Game Over !</h6>
+                    <form onSubmit={this.handleSubmitSavePlayer}>
+                        <label>Enter Your Name :</label>
+                        <input type="text" onChange={this.handleSavePlayer}
+                            value={this.state.player} />
+                    </form>
+                </div>
+            )
+        }
+
+    }
+
+    const Question = ({ question, totalQuestions }) => {
+
+        return question.question ? (
+            <div className="center container">
+                <h6>
+                    Question {totalQuestions + 1} of 30
+                </h6>
+                <blockquote>
+                    {question.question}
+                </blockquote>
+            </div>
+        ) :
+            (
+                Preloader()
+            )
+
+    }
+
+    const Options = ({ question, checkAnswer, selectedAnswer, isIncorrectAnswer, allAnswers }) => {
+
+        const allOptions = question.question ? (
+            allAnswers.map((option) => {
+                return (
+                    <div className={(selectedAnswer === option ?
+                        (!isIncorrectAnswer ? "collection-item cyan lighten-3" :
+                            "collection-item red lighten-3") :
+                        (isIncorrectAnswer &&
+                            option === question.correct_answer &&
+                            selectedAnswer
+                            ? "collection-item cyan lighten-3" : "collection-item"))}
+                        onClick={() => { checkAnswer(option) }}>
+                        <span>{option}
+                        </span>
+                    </div >
+                )
+            })
+        ) : (
+
+                <p className="center">Loading Options</p>
+
+            )
+
+        return (<div className="options collection">{allOptions}</div>)
+
+    }
+
+    const Scoreboard = ({ rightAnswers, totalQuestions }) => {
+
+        return (
+            <div className="center scoreboard orange lighten-3">
+                Score: {rightAnswers}/{totalQuestions}
+            </div>
+        )
+    }
+
+    const Credits = () => {
+        return (
+            <div className="container center credits">
+                <span className="credit-text">Made By&nbsp;
+                    <a href="http://rudraksh.dx.am">Rudr Thakur</a>
+                    &nbsp;with<i className="material-icons heart">favorite</i></span>
+            </div>
+        )
+    }
+
+    const GreetPlayer = ({ playerName, score, time }) => {
+
+        return (
+            <div className="container center">
+                <p>Your Score is {score}/30 in {time / 1000} Seconds. Thanks For Playing, {playerName}. Your Score Has Been Recorded.</p>
+                <a class="waves-effect waves-light btn" onClick={playAgain}><i class="material-icons left">autorenew</i>Play Again</a>
+            </div>
+        )
+    }
+
+    const playAgain = () => {
+        window.location.reload();
+    }
+
+    const Preloader = () => {
+
+        return (
+            <div className="container center preloader">
+                <div className="preloader-wrapper active">
+                    <div className="spinner-layer spinner-red-only">
+                        <div className="circle-clipper left">
+                            <div className="circle"></div>
+                        </div><div className="gap-patch">
+                            <div className="circle"></div>
+                        </div><div className="circle-clipper right">
+                            <div className="circle"></div>
+                        </div>
+                    </div>
+                </div>
+                <p className="center">Loading</p>
+            </div>
+        )
+    }
+
+
+    /* ------------------------------------------------
+                           APP
+   --------------------------------------------------- */
+
+    class App extends React.Component {
+
+        constructor(props) {
+            super(props);
+            this.state = {
+                questionsSet: [],
+                question: {},
+                allAnswers: [],
+                selectedAnswer: '',
+                rightAnswers: 0,
+                totalQuestions: 0,
+                playerName: '',
+                askPlayerName: false,
+                showPreloader: false,
+                isIncorrectAnswer: true,
+                time: 0,
+                isOn: false,
+                start: 0
+            }
+        }
+
+        startTimer = () => {
+            this.setState({
+                isOn: true,
+                time: this.state.time,
+                start: Date.now() - this.state.time
+            })
+            this.timer = setInterval(() => this.setState({
+                time: Date.now() - this.state.start
+            }), 1);
+        }
+
+        stopTimer = () => {
+            this.setState({ isOn: false })
+            clearInterval(this.timer)
+        }
+
+        resetTimer = () => {
+            this.setState({ time: 0, isOn: false })
+        }
+
+        async componentDidMount() {
+            const quizAPIUrl = 'https://opentdb.com/api.php?amount=30&category=18&difficulty=easy&type=multiple';
+            const response = await fetch(quizAPIUrl);
+            const data = await response.json();
+            this.setState({
+                question: data.results[0],
+                questionsSet: data.results
+            })
+            this.getAnswers(this.state.question)
+            this.startTimer()
+        }
+
+        nextQuestion() {
+            if (this.state.totalQuestions > 29) {
+
+                this.stopTimer()
+
+                this.setState({
+                    askPlayerName: true
+                })
+
+            }
+            else {
+
+                this.setState({
+                    question: this.state.questionsSet[this.state.totalQuestions],
+                    showPreloader: true
+                })
+                this.getAnswers(this.state.question)
+
+                setTimeout(function () {
+                    this.setState({
+                        showPreloader: false
+                    })
+                }.bind(this), 2000)
+            }
+
+            this.setState({
+                selectedAnswer: ''
+            })
+        }
+
+        checkAnswer = (option) => {
+
+            if (this.state.question.correct_answer === option) {
+                this.setState({
+                    rightAnswers: this.state.rightAnswers + 1,
+                    isIncorrectAnswer: false
+                })
+                // Right Answer
+            }
+
+            else {
+                // Wrong Answer
+                this.setState({
+                    isIncorrectAnswer: true
+                })
+            }
+
+            this.setState({
+                totalQuestions: this.state.totalQuestions + 1,
+                selectedAnswer: option
+            })
+
+            setTimeout(function () {
+                this.nextQuestion();
+            }.bind(this), 500)
+
+        }
+
+        async savePlayer(playerName) {
+
+            this.setState({
+                playerName: playerName
+            })
+
+            try {
+
+                let res = await fetch('http://rudraksh.dx.am/reactjs/quiz/api/savePlayer.php',
+
+                    {
+                        method: 'post',
+                        mode: 'no-cors',
+                        headers: {
+                            'Accept': 'application/json',
+                            'Content-type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            "playerName": playerName,
+                            "score": this.state.rightAnswers,
+                            "time_taken": Math.floor(this.state.time / 1000)
+                        })
+                    });
+
+                console.log('Response : ' + res.statusText);
+
+            }
+
+            catch (e) {
+                console.log(e);
+            }
+
+        }
+
+        getAnswers = (question) => {
+
+            let correctAnswer = question.correct_answer;
+
+            let incorrectAnswers = question.incorrect_answers;
+
+            let allAnswers = [];
+
+            allAnswers.push(correctAnswer);
+
+            for (const key in incorrectAnswers) {
+                allAnswers.push(incorrectAnswers[key]);
+            }
+
+            allAnswers.sort(() => Math.random() - 0.5)
+
+            this.setState({
+                allAnswers: allAnswers
+            })
+
+        }
+
+        render() {
+            return (
+                <div className="quiz-app container">
+                    <h4 className="center blue-text">Quiz-Game</h4>
+                    <Scoreboard
+                        rightAnswers={this.state.rightAnswers}
+                        totalQuestions={this.state.totalQuestions} />
+                    <Timer time={this.state.time} />
+                    {this.state.showPreloader ? <Preloader /> : null}
+                    {!this.state.askPlayerName &&
+                        !this.state.showPreloader ? <Question
+                            question={this.state.question}
+                            totalQuestions={this.state.totalQuestions}
+                        /> : null}
+                    {!this.state.askPlayerName &&
+                        !this.state.showPreloader ? <Options
+                            allAnswers={this.state.allAnswers}
+                            selectedAnswer={this.state.selectedAnswer}
+                            checkAnswer={this.checkAnswer}
+                            question={this.state.question}
+                            isIncorrectAnswer={this.state.isIncorrectAnswer} /> : null}
+                    {this.state.askPlayerName && !this.state.playerName ? <SavePlayer savePlayer={this.savePlayer.bind(this)} /> : null}
+                    {this.state.playerName ? <GreetPlayer
+                        playerName={this.state.playerName}
+                        time={this.state.time}
+                        score={this.state.rightAnswers} /> : null}
+                    <Credits />
+                </div>
+            )
+        }
+    }
+
+    ReactDOM.render(<App />, document.getElementById("app"))
+</script>
+
+</html>
