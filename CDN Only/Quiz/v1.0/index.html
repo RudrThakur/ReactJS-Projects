@@ -77,12 +77,16 @@
         }
 
     }
-    const Question = ({ question }) => {
+    const Question = ({ question, totalQuestions }) => {
 
         return question.question ? (
             <div className="center container">
-                <span>{question.question}
-                </span>
+                <h6>
+                    Question {totalQuestions + 1} of 30
+                </h6>
+                <blockquote>
+                    {question.question}
+                </blockquote>
             </div>
         ) :
             (
@@ -290,6 +294,7 @@
                     {!this.state.askPlayerName &&
                         !this.state.showPreloader ? <Question
                             question={this.state.question}
+                            totalQuestions={this.state.totalQuestions}
                         /> : null}
                     {!this.state.askPlayerName &&
                         !this.state.showPreloader ? <Options
