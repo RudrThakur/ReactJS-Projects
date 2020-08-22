@@ -95,19 +95,7 @@
 
     }
 
-    const Options = ({ question, checkAnswer, selectedAnswer, isIncorrectAnswer }) => {
-
-        let correctAnswer = question.correct_answer;
-
-        let incorrectAnswers = question.incorrect_answers;
-
-        let allAnswers = [];
-
-        allAnswers.push(correctAnswer);
-
-        for (const key in incorrectAnswers) {
-            allAnswers.push(incorrectAnswers[key]);
-        }
+    const Options = ({ question, checkAnswer, selectedAnswer, isIncorrectAnswer, allAnswers }) => {
 
         const allOptions = question.question ? (
             allAnswers.map((option) => {
@@ -116,7 +104,7 @@
                         (!isIncorrectAnswer ? "collection-item cyan lighten-3" :
                             "collection-item red lighten-3") :
                         (isIncorrectAnswer &&
-                            option === correctAnswer &&
+                            option === question.correct_answer &&
                             selectedAnswer
                             ? "collection-item cyan lighten-3" : "collection-item"))}
                         onClick={() => { checkAnswer(option) }}>
@@ -200,6 +188,7 @@
             this.state = {
                 questionsSet: [],
                 question: {},
+                allAnswers: [],
                 selectedAnswer: '',
                 rightAnswers: 0,
                 totalQuestions: 0,
@@ -218,6 +207,7 @@
                 question: data.results[0],
                 questionsSet: data.results
             })
+            this.getAnswers(this.state.question)
         }
 
         nextQuestion() {
@@ -234,6 +224,7 @@
                     question: this.state.questionsSet[this.state.totalQuestions],
                     showPreloader: true
                 })
+                this.getAnswers(this.state.question)
 
                 setTimeout(function () {
                     this.setState({
@@ -283,6 +274,28 @@
 
         }
 
+        getAnswers = (question) => {
+
+            let correctAnswer = question.correct_answer;
+
+            let incorrectAnswers = question.incorrect_answers;
+
+            let allAnswers = [];
+
+            allAnswers.push(correctAnswer);
+
+            for (const key in incorrectAnswers) {
+                allAnswers.push(incorrectAnswers[key]);
+            }
+
+            allAnswers.sort(() => Math.random() - 0.5)
+
+            this.setState({
+                allAnswers: allAnswers
+            })
+
+        }
+
         render() {
             return (
                 <div className="quiz-app container">
@@ -298,6 +311,7 @@
                         /> : null}
                     {!this.state.askPlayerName &&
                         !this.state.showPreloader ? <Options
+                            allAnswers={this.state.allAnswers}
                             selectedAnswer={this.state.selectedAnswer}
                             checkAnswer={this.checkAnswer}
                             question={this.state.question}
