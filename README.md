@@ -1,2 +1,2 @@
 # ReactJS-Projects
-Mini Projects built in React JS
+Mini Projects built in React JS & MySQL
