@@ -1,2 +1,2 @@
 # ReactJS-Projects
-Project Oriented Learning Is the Best !
+Mini Projects built in React JS
